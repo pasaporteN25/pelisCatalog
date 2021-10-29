@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_home"
+    app:startDestination="@id/splashScreen">
+
+    <fragment
+        android:id="@+id/inicioFragment"
+        android:name="com.feluts.peliscatalog.ui.view.InicioFragment"
+        android:label="inicio_fragment"
+        tools:layout="@layout/inicio_fragment" >
+        <action
+            android:id="@+id/action_inicioFragment_to_detallesFragment"
+            app:destination="@id/detallesFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+        <argument
+            android:name="peliculaId"
+            app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/detallesFragment"
+        android:name="com.feluts.peliscatalog.ui.view.DetallesFragment"
+        android:label="detalles_fragment"
+        tools:layout="@layout/detalles_fragment" >
+        <argument
+            android:name="idPeli"
+            app:argType="integer" />
+        <argument android:name="dataPeli"
+            app:argType="com.feluts.peliscatalog.model.Pelicula" />
+    </fragment>
+    <fragment
+        android:id="@+id/splashScreen"
+        android:name="com.feluts.peliscatalog.ui.view.SplashScreen"
+        android:label="fragment_splash_screen"
+        tools:layout="@layout/fragment_splash_screen">
+        <action
+            android:id="@+id/action_splashScreen_to_inicioFragment"
+            app:destination="@id/inicioFragment"
+            app:popUpTo="@id/splashScreen"
+            app:popUpToInclusive="true"/>
+    </fragment>
+</navigation>
