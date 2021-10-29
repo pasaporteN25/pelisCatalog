@@ -5,7 +5,7 @@
     android:id="@+id/contenedor_inicio"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#c4ecdb"
+    android:backgroundTint="@drawable/inicio_gradiente"
     tools:context=".ui.view.InicioFragment">
 
     <LinearLayout

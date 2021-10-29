@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.feluts.peliscatalog.R
@@ -33,7 +34,7 @@ class DetallesFragment : Fragment(R.layout.detalles_fragment) {
         savedInstanceState: Bundle?
     ): View{
         _binding = DetallesFragmentBinding.inflate(inflater, container, false)
-
+        (activity as AppCompatActivity).supportActionBar?.setTitle("Inicio")
         binding.peliConst.visibility = View.INVISIBLE
         binding.progressBar3.visibility = View.VISIBLE
         Handler().postDelayed({
@@ -51,6 +52,7 @@ class DetallesFragment : Fragment(R.layout.detalles_fragment) {
         Log.e("Data","$dataExtra")
         binding.tituloTxt.setText(args.dataPeli.titulo)
         binding.rateTxt.setText(args.dataPeli.rating.toString())
+        binding.generoTxt.setText(args.dataPeli.genero.toString())
         Glide.with(requireView().context).load("https://image.tmdb.org/t/p/w500${args.dataPeli.img}")
             .centerCrop()
             .into(binding.poster)
@@ -62,7 +64,9 @@ class DetallesFragment : Fragment(R.layout.detalles_fragment) {
         DetallesVM = ViewModelProvider(this).get(DetallesViewModel::class.java)
         var dataExtra = DetallesVM.getExtraInfo(args.dataPeli.id)
         Handler().postDelayed({binding.descripcion.setText(dataExtra[0].resumen)
-            binding.estrenoTxt.setText("Estreno: "+dataExtra[0].estreno)},3000)
+            binding.estrenoTxt.setText("Estreno: "+dataExtra[0].estreno)
+            binding.totalvotesTxt.setText("Votos total: "+dataExtra[0].totalVotos)
+                              },3000)
 
     }
 
