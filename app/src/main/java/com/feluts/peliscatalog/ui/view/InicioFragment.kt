@@ -1,5 +1,7 @@
 package com.feluts.peliscatalog.ui.view
 
+import android.content.Context
+import android.net.ConnectivityManager
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.os.Handler
@@ -17,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.feluts.peliscatalog.R
 import com.feluts.peliscatalog.model.Pelicula
+import com.feluts.peliscatalog.model.PeliculaEnt
 import com.feluts.peliscatalog.rv.PeliculaAdapter
 import com.feluts.peliscatalog.ui.viewmodel.InicioViewModel
 import kotlinx.coroutines.Dispatchers
@@ -52,8 +55,21 @@ class InicioFragment : Fragment() {
         rvPelis.visibility = View.INVISIBLE
         rvPelis.isVisible = false
 
+        //Probar si existe la info en la db sino aregarla,
+        //si existe traerla
+        val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if(connectivityManager != null){
+            lanzadera()
+        }else{
+            try {
+                //val peli:PeliculaEnt = PeliculaEnt()
+                //InicioVM.addPeli()
+            }catch (e: Exception){
+                Log.d("Error al traer info","Error")
+            }
+        }
 
-        lanzadera()
+
 
 
         return view
@@ -135,7 +151,6 @@ class InicioFragment : Fragment() {
             }
         }
     }
-
 
 }
 

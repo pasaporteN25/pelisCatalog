@@ -1,10 +1,17 @@
 package com.feluts.peliscatalog.ui.viewmodel
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.feluts.peliscatalog.api.ApiTMDB
 import com.feluts.peliscatalog.api.ApiTMDBImp
+import com.feluts.peliscatalog.db.PelisDatabase
+import com.feluts.peliscatalog.db.PelisRepository
 import com.feluts.peliscatalog.model.Pelicula
+import com.feluts.peliscatalog.model.PeliculaEnt
 import com.feluts.peliscatalog.model.Respuesta
 import com.feluts.peliscatalog.rv.PeliculaAdapter
 import kotlinx.coroutines.*
@@ -13,9 +20,17 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.awaitResponse
 
-class InicioViewModel : ViewModel() {
+class InicioViewModel(application: Application) : AndroidViewModel(application) {
 
     private val listaPeliculas = ArrayList<Pelicula>()
+    private val getAllPelis: LiveData<ArrayList<PeliculaEnt>>
+    private val repository: PelisRepository
+
+    init{
+        val peliDao = PelisDatabase.getDB(application).peliDao()
+        repository = PelisRepository(peliDao)
+        getAllPelis = repository.getAllPelis
+    }
 
     suspend fun getTopRatedMovies(): Call<Respuesta> {
         val api = ApiTMDBImp()
@@ -40,7 +55,7 @@ class InicioViewModel : ViewModel() {
                 for (peli in data.peliculas) {
                     listaPeliculas.add(
                         Pelicula(
-                            peli.id, peli.titulo, peli.genero, peli.rating, peli.img
+                            peli.id, peli.titulo, peli.genero, peli.idioma, peli.rating, peli.img
                         )
                     )
                     total += 1
@@ -60,7 +75,7 @@ class InicioViewModel : ViewModel() {
                 for (peli in data.peliculas) {
                     listaPeliculas.add(
                         Pelicula(
-                            peli.id, peli.titulo, peli.genero, peli.rating, peli.img
+                            peli.id, peli.titulo, peli.genero, peli.idioma, peli.rating, peli.img
                         )
                     )
                     total += 1
@@ -71,4 +86,11 @@ class InicioViewModel : ViewModel() {
         return listaPeliculas
 
     }
+
+    fun addPeli(peli: PeliculaEnt){
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.addPeli(peli)
+        }
+    }
+
 }
