@@ -35,7 +35,7 @@ class InicioFragment : Fragment() {
     private lateinit var rvPelis: RecyclerView
     private lateinit var PBar: ProgressBar
     private lateinit var cont: ConstraintLayout
-
+    var paginAct:Int = 1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,14 +52,27 @@ class InicioFragment : Fragment() {
         rvPelis.visibility = View.INVISIBLE
         rvPelis.isVisible = false
 
+
         lanzadera()
+
 
         return view
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        rvPelis.addOnScrollListener(object :  RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
 
+                if(!recyclerView.canScrollVertically(RecyclerView.FOCUS_DOWN)){
+                    Toast.makeText(context,"Final",Toast.LENGTH_LONG).show()
+
+                    lanzadera2(paginAct)
+                }
+            }
+
+        })
     }
 
     fun lanzadera(){
@@ -91,6 +104,38 @@ class InicioFragment : Fragment() {
             }
         }
     }
+
+    fun lanzadera2(page: Int){
+        GlobalScope.launch(Dispatchers.IO) {
+
+            try {
+                val info = InicioVM.getMoreTRM(page)
+
+
+                withContext(Dispatchers.Main) {
+                    PBar.isVisible = false
+                    PBar.visibility = View.INVISIBLE
+                    rvPelis.isVisible = true
+                    rvPelis.visibility = View.VISIBLE
+
+                    rvPelis.adapter = PeliculaAdapter(info)
+                    Handler().postDelayed({ rvPelis.adapter?.notifyDataSetChanged() }, 3000)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Revisa tu conexion a internet", Toast.LENGTH_SHORT)
+                        .show()
+                    lanzadera2(page)
+                    cont.setOnClickListener(
+                        View.OnClickListener {
+                            lanzadera2(page)
+                        }
+                    )
+                }
+            }
+        }
+    }
+
 
 }
 

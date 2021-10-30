@@ -17,57 +17,58 @@ class InicioViewModel : ViewModel() {
 
     private val listaPeliculas = ArrayList<Pelicula>()
 
-    suspend fun getTopRatedMovies(): Call<Respuesta>{
+    suspend fun getTopRatedMovies(): Call<Respuesta> {
         val api = ApiTMDBImp()
 
         return api.getTopRatedMovies()
     }
 
-    suspend fun getAllMovies(): ArrayList<Pelicula>{
+
+    suspend fun getMoreTopRatedMovies(page: Int): Call<Respuesta> {
+        val api = ApiTMDBImp()
+
+        return api.getMoreTopRated(page)
+    }
+
+    suspend fun getAllMovies(): ArrayList<Pelicula> {
 
         val resp = getTopRatedMovies().awaitResponse()
-        if(resp.isSuccessful){
-            val data= resp.body()
-            if (data != null){
-                var total:Int=0
-                for(peli in data.peliculas){
+        if (resp.isSuccessful) {
+            val data = resp.body()
+            if (data != null) {
+                var total: Int = 0
+                for (peli in data.peliculas) {
                     listaPeliculas.add(
-                        Pelicula(peli.id
-                            ,peli.titulo
-                            ,peli.genero
-                            ,peli.rating
-                            ,peli.img)
+                        Pelicula(
+                            peli.id, peli.titulo, peli.genero, peli.rating, peli.img
+                        )
                     )
-                    total+=1
+                    total += 1
                 }
-                Log.e("Cargando peliculas... ","$total")
+                Log.e("Cargando peliculas... ", "$total")
+            }
         }
-//        resp.enqueue(
-//            object : Callback<Respuesta>{
-//                override fun onFailure(call: Call<Respuesta>, t: Throwable) {
-//                    Log.e("Error al invocar la API", t.message.toString())
-//                }
-//
-//                override fun onResponse(call: Call<Respuesta>, response: Response<Respuesta>) {
-//                    val data= response.body()
-//                    if (data != null){
-//                        var total:Int=0
-//                        for(peli in data.peliculas){
-//                            listaPeliculas.add(
-//                                Pelicula(peli.id
-//                                ,peli.titulo
-//                                ,peli.genero
-//                                ,peli.rating
-//                                ,peli.img)
-//                            )
-//                            total+=1
-//                        }
-//                        Log.e("Cargando peliculas... ","$total")
-//                    }
-//
-//                }
-//            }
-//        )
-        //return  listaPeliculas
+        return listaPeliculas
     }
-return listaPeliculas}}
+
+    suspend fun getMoreTRM(page: Int): ArrayList<Pelicula>{
+        val resp = getMoreTopRatedMovies(page).awaitResponse()
+        if (resp.isSuccessful) {
+            val data = resp.body()
+            if (data != null) {
+                var total: Int = 0
+                for (peli in data.peliculas) {
+                    listaPeliculas.add(
+                        Pelicula(
+                            peli.id, peli.titulo, peli.genero, peli.rating, peli.img
+                        )
+                    )
+                    total += 1
+                }
+                Log.e("Cargando peliculas... ", "$total")
+            }
+        }
+        return listaPeliculas
+
+    }
+}

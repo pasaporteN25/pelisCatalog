@@ -12,8 +12,13 @@ interface ApiTMDB {
 
     @GET("movie/top_rated")
     fun getPelicula(
-        @Query("api_key") apiKey: String = "2f2c5419a59e275f372ef56e8f0ff35b"
+        @Query("api_key") apiKey: String = "2f2c5419a59e275f372ef56e8f0ff35b",
     ):Call<Respuesta>
+
+    @GET("movie/top_rated?api_key=2f2c5419a59e275f372ef56e8f0ff35b&page={page}")
+    fun getMorePeliculas(
+        @Path("page") page: Int
+    ): Call<Respuesta>
 
     @GET("movie/{id}")
     fun getPeliculaById(

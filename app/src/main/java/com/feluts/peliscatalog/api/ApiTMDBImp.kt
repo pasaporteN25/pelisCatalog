@@ -20,6 +20,10 @@ class ApiTMDBImp {
         return getRetrofit().create(ApiTMDB::class.java).getPelicula()
     }
 
+    fun getMoreTopRated(page:Int):Call<Respuesta>{
+        return getRetrofit().create(ApiTMDB::class.java).getMorePeliculas(page)
+    }
+
     fun getMovieById(id: Int): Call<PeliculaById>{
         return getRetrofit().create(ApiTMDB::class.java).getPeliculaById(id)
     }
