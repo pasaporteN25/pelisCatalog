@@ -8,8 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.feluts.peliscatalog.api.ApiTMDB
 import com.feluts.peliscatalog.api.ApiTMDBImp
-import com.feluts.peliscatalog.db.PelisDatabase
-import com.feluts.peliscatalog.db.PelisRepository
+import com.feluts.peliscatalog.db2.PeliApp.Companion.db
 import com.feluts.peliscatalog.model.Pelicula
 import com.feluts.peliscatalog.model.PeliculaEnt
 import com.feluts.peliscatalog.model.Respuesta
@@ -20,26 +19,27 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.awaitResponse
 
-class InicioViewModel(application: Application) : AndroidViewModel(application) {
+class InicioViewModel (application: Application): AndroidViewModel(application) {
 
-    private val listaPeliculas = ArrayList<Pelicula>()
-    private val getAllPelis: LiveData<ArrayList<PeliculaEnt>>
-    private val repository: PelisRepository
+    val listaPeliculas = ArrayList<Pelicula>()
+//    private val repository: PelisRepository
+//    private val getAllPelis: List<PeliculaEnt>
+//
+//
+//    init{
+//        val peliDao = PelisDatabase.getDB(application).peliDao()
+//        repository = PelisRepository(peliDao)
+//        getAllPelis = repository.getAllPelis
+//    }
 
-    init{
-        val peliDao = PelisDatabase.getDB(application).peliDao()
-        repository = PelisRepository(peliDao)
-        getAllPelis = repository.getAllPelis
-    }
-
-    suspend fun getTopRatedMovies(): Call<Respuesta> {
+    fun getTopRatedMovies(): Call<Respuesta> {
         val api = ApiTMDBImp()
 
         return api.getTopRatedMovies()
     }
 
 
-    suspend fun getMoreTopRatedMovies(page: Int): Call<Respuesta> {
+    fun getMoreTopRatedMovies(page: Int): Call<Respuesta> {
         val api = ApiTMDBImp()
 
         return api.getMoreTopRated(page)
@@ -88,9 +88,13 @@ class InicioViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun addPeli(peli: PeliculaEnt){
+
         viewModelScope.launch(Dispatchers.IO) {
-            repository.addPeli(peli)
+
+            db.peliDao().addPeli(peli)
         }
     }
+
+
 
 }

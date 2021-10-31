@@ -1,5 +1,7 @@
 package com.feluts.peliscatalog.ui.view
 
+import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.ViewModelProvider
@@ -15,13 +17,19 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.feluts.peliscatalog.R
+import com.feluts.peliscatalog.db2.PeliApp
 import com.feluts.peliscatalog.model.Pelicula
 import com.feluts.peliscatalog.model.PeliculaEnt
 import com.feluts.peliscatalog.rv.PeliculaAdapter
 import com.feluts.peliscatalog.ui.viewmodel.InicioViewModel
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -39,6 +47,7 @@ class InicioFragment : Fragment() {
     private lateinit var PBar: ProgressBar
     private lateinit var cont: ConstraintLayout
     var paginAct:Int = 1
+    //val app by lazy { activity?.applicationContext as PeliApp }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,7 +56,12 @@ class InicioFragment : Fragment() {
         val view = inflater.inflate(R.layout.inicio_fragment, container, false)
         (activity as AppCompatActivity).supportActionBar?.show()
 
+        //InicioVM = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory
+        //    .getInstance(Application())).get(InicioViewModel::class.java)
+
+
         InicioVM = ViewModelProvider(this).get(InicioViewModel::class.java)
+
         rvPelis = view.findViewById(R.id.peli_rv)
         rvPelis.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
         PBar = view.findViewById(R.id.progressBar)
@@ -60,10 +74,11 @@ class InicioFragment : Fragment() {
         val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         if(connectivityManager != null){
             lanzadera()
+
         }else{
             try {
-                //val peli:PeliculaEnt = PeliculaEnt()
-                //InicioVM.addPeli()
+                //Aca iria la consulta si no hay internet
+
             }catch (e: Exception){
                 Log.d("Error al traer info","Error")
             }
@@ -83,7 +98,7 @@ class InicioFragment : Fragment() {
 
                 if(!recyclerView.canScrollVertically(RecyclerView.FOCUS_DOWN)){
                     Toast.makeText(context,"Final",Toast.LENGTH_LONG).show()
-
+                    paginAct+=1
                     lanzadera2(paginAct)
                 }
             }
@@ -91,11 +106,32 @@ class InicioFragment : Fragment() {
         })
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+
+    }
+
     fun lanzadera(){
         GlobalScope.launch(Dispatchers.IO) {
 
             try {
                 val info = InicioVM.getAllMovies()
+                //info[0].genero
+                val peli:PeliculaEnt = PeliculaEnt(info[0].id
+                    ,info[0].titulo, "otro",
+                    info[0].idioma, info[0].rating, info[0].img)
+                //InicioVM.addPeli(peli)
+                //app.room.peliDao().addPeli(peli)
+                info.forEachIndexed{ index, p ->
+                    val pe = PeliculaEnt(info[index].id
+                        ,info[index].titulo, "otro",
+                        info[index].idioma, info[index].rating, info[index].img)
+                    InicioVM.addPeli(pe)
+
+                }
+
+                Log.d("DB: ","Punto de guardado")
 
 
                 withContext(Dispatchers.Main) {
