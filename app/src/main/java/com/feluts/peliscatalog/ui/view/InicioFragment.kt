@@ -1,14 +1,10 @@
 package com.feluts.peliscatalog.ui.view
 
-import android.app.Activity
-import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,19 +13,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.feluts.peliscatalog.R
-import com.feluts.peliscatalog.db2.PeliApp
-import com.feluts.peliscatalog.model.Pelicula
 import com.feluts.peliscatalog.model.PeliculaEnt
 import com.feluts.peliscatalog.rv.PeliculaAdapter
 import com.feluts.peliscatalog.ui.viewmodel.InicioViewModel
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -63,6 +55,7 @@ class InicioFragment : Fragment() {
         InicioVM = ViewModelProvider(this).get(InicioViewModel::class.java)
 
         rvPelis = view.findViewById(R.id.peli_rv)
+        rvPelis.layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
         rvPelis.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
         PBar = view.findViewById(R.id.progressBar)
         cont = view.findViewById(R.id.contenedor_inicio)
@@ -97,7 +90,7 @@ class InicioFragment : Fragment() {
                 super.onScrolled(recyclerView, dx, dy)
 
                 if(!recyclerView.canScrollVertically(RecyclerView.FOCUS_DOWN)){
-                    Toast.makeText(context,"Final",Toast.LENGTH_LONG).show()
+                    //Toast.makeText(context,"Final",Toast.LENGTH_LONG).show()
                     paginAct+=1
                     lanzadera2(paginAct)
                 }
@@ -106,10 +99,11 @@ class InicioFragment : Fragment() {
         })
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        //val recyclerViewState = rvPelis.layoutManager?.onSaveInstanceState()
 
-
+        //rvPelis.layoutManager?.onRestoreInstanceState(recyclerViewState)
     }
 
     fun lanzadera(){
@@ -161,22 +155,20 @@ class InicioFragment : Fragment() {
         GlobalScope.launch(Dispatchers.IO) {
 
             try {
+                //tendria que poner si es la primer pagina o no
+
                 val info = InicioVM.getMoreTRM(page)
 
-
                 withContext(Dispatchers.Main) {
-                    PBar.isVisible = false
-                    PBar.visibility = View.INVISIBLE
-                    rvPelis.isVisible = true
-                    rvPelis.visibility = View.VISIBLE
 
                     rvPelis.adapter = PeliculaAdapter(info)
-                    Handler().postDelayed({ rvPelis.adapter?.notifyDataSetChanged() }, 3000)
+                    Handler().postDelayed({ rvPelis.adapter?.notifyDataSetChanged() }, 1000)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Revisa tu conexion a internet", Toast.LENGTH_SHORT)
+                    Toast.makeText(requireContext(), "No se pudo cargar mas", Toast.LENGTH_SHORT)
                         .show()
+                    Log.e("Error scroll","$e")
                     lanzadera2(page)
                     cont.setOnClickListener(
                         View.OnClickListener {
