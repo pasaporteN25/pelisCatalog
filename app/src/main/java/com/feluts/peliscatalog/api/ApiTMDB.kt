@@ -1,6 +1,5 @@
 package com.feluts.peliscatalog.api
 
-import com.feluts.peliscatalog.model.Pelicula
 import com.feluts.peliscatalog.model.PeliculaById
 import com.feluts.peliscatalog.model.Respuesta
 import retrofit2.Call
@@ -10,14 +9,15 @@ import retrofit2.http.Query
 
 interface ApiTMDB {
 
-    @GET("movie/top_rated")
-    fun getPelicula(
-        @Query("api_key") apiKey: String = "2f2c5419a59e275f372ef56e8f0ff35b",
-    ):Call<Respuesta>
+//    @GET("movie/top_rated")
+//    fun getPelicula(
+//        @Query("api_key") apiKey: String = "2f2c5419a59e275f372ef56e8f0ff35b",
+//    ):Call<Respuesta>
 
     @GET("movie/top_rated?api_key=2f2c5419a59e275f372ef56e8f0ff35b")
     fun getMorePeliculas(
-        @Query("page") page: Int
+        @Query("page") page: Int,
+        @Query("api_key") apiKey: String = "2f2c5419a59e275f372ef56e8f0ff35b"
     ): Call<Respuesta>
 
     @GET("movie/{id}")

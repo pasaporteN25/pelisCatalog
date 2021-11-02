@@ -16,9 +16,9 @@ class ApiTMDBImp {
             .baseUrl("https://api.themoviedb.org/3/").build()
     }
 
-    fun getTopRatedMovies(): Call<Respuesta>{
-        return getRetrofit().create(ApiTMDB::class.java).getPelicula()
-    }
+//    fun getTopRatedMovies(): Call<Respuesta>{
+//        return getRetrofit().create(ApiTMDB::class.java).getPelicula()
+//    }
 
     fun getMoreTopRated(page:Int):Call<Respuesta>{
         return getRetrofit().create(ApiTMDB::class.java).getMorePeliculas(page)

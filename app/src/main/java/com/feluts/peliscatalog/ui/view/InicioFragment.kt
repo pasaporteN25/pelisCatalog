@@ -2,6 +2,7 @@ package com.feluts.peliscatalog.ui.view
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.feluts.peliscatalog.R
+import com.feluts.peliscatalog.model.Pelicula
 import com.feluts.peliscatalog.model.PeliculaEnt
 import com.feluts.peliscatalog.rv.PeliculaAdapter
 import com.feluts.peliscatalog.ui.viewmodel.InicioViewModel
@@ -38,8 +40,9 @@ class InicioFragment : Fragment() {
     private lateinit var rvPelis: RecyclerView
     private lateinit var PBar: ProgressBar
     private lateinit var cont: ConstraintLayout
-    var paginAct:Int = 1
-    //val app by lazy { activity?.applicationContext as PeliApp }
+    var paginAct: Int = 1
+    private lateinit var pelis: ArrayList<Pelicula>
+    private lateinit var gen: ArrayList<Int>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,16 +67,39 @@ class InicioFragment : Fragment() {
 
         //Probar si existe la info en la db sino aregarla,
         //si existe traerla
-        val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if(connectivityManager != null){
-            lanzadera()
 
-        }else{
+        if (isOnline(view.context) == true) {
+
+            lanzadera(1)
+
+        } else {
+            Toast.makeText(requireContext(), "Revisa la conexion a internet", Toast.LENGTH_LONG)
+                .show()
+
             try {
-                //Aca iria la consulta si no hay internet
+                //Aca iria la consulta a la db si no hay internet
+                //por algun motivo si no hay internet esto rompe
+                // Creo que es porque estamos haciendolo en el oncreate
+                //y si no hay internet al estar el scroll abajo triggea la lanzadera
+                val pfdb = InicioVM.getPelis()
 
-            }catch (e: Exception){
-                Log.d("Error al traer info","Error")
+                PBar.isVisible = false
+                PBar.visibility = View.INVISIBLE
+                rvPelis.isVisible = true
+                rvPelis.visibility = View.VISIBLE
+
+
+
+                for (p in pfdb) {
+                    gen.add(0)
+                    pelis.add(Pelicula(p.id, p.titulo, gen, p.idioma, p.rating, p.img))
+                }
+
+                rvPelis.adapter = PeliculaAdapter(pelis)
+                Handler().postDelayed({ rvPelis.adapter?.notifyDataSetChanged() }, 3000)
+
+            } catch (e: Exception) {
+                Log.d("Error al traer info", "Error")
             }
         }
 
@@ -85,18 +111,27 @@ class InicioFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        rvPelis.addOnScrollListener(object :  RecyclerView.OnScrollListener() {
+        rvPelis.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
+                if (!recyclerView.canScrollVertically(RecyclerView.FOCUS_UP)) {
+                    if(!isOnline(requireContext().applicationContext)){
+                        Toast.makeText(requireContext(),"No hay internet",Toast.LENGTH_LONG).show()
+                        //consulta db!
+                    }else{
+                        paginAct += 1
+                        lanzadera(paginAct)
+                        Log.d("Api:", "Cargando mas...")
+                    }
 
-                if(!recyclerView.canScrollVertically(RecyclerView.FOCUS_DOWN)){
-                    //Toast.makeText(context,"Final",Toast.LENGTH_LONG).show()
-                    paginAct+=1
-                    lanzadera2(paginAct)
+
                 }
             }
-
         })
+
+
+
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -106,44 +141,47 @@ class InicioFragment : Fragment() {
         //rvPelis.layoutManager?.onRestoreInstanceState(recyclerViewState)
     }
 
-    fun lanzadera(){
+    fun lanzadera(page: Int) {
         GlobalScope.launch(Dispatchers.IO) {
 
             try {
-                val info = InicioVM.getAllMovies()
-                //info[0].genero
-                val peli:PeliculaEnt = PeliculaEnt(info[0].id
-                    ,info[0].titulo, "otro",
-                    info[0].idioma, info[0].rating, info[0].img)
-                //InicioVM.addPeli(peli)
-                //app.room.peliDao().addPeli(peli)
-                info.forEachIndexed{ index, p ->
-                    val pe = PeliculaEnt(info[index].id
-                        ,info[index].titulo, "otro",
-                        info[index].idioma, info[index].rating, info[index].img)
-                    InicioVM.addPeli(pe)
-
+                val info = InicioVM.getMoreTRM(page)
+                info.forEachIndexed { index, p ->
+                    val peli = PeliculaEnt(
+                        info[index].id, info[index].titulo, "otro",
+                        info[index].idioma, info[index].rating, info[index].img
+                    )
+                    InicioVM.addPeli(peli)
                 }
 
-                Log.d("DB: ","Punto de guardado")
 
+                //log de guardado en db
+                //Log.d("DB: ","Punto de guardado")
 
                 withContext(Dispatchers.Main) {
-                    PBar.isVisible = false
-                    PBar.visibility = View.INVISIBLE
-                    rvPelis.isVisible = true
-                    rvPelis.visibility = View.VISIBLE
+
+                    if (page == 1) {
+                        PBar.isVisible = false
+                        PBar.visibility = View.INVISIBLE
+                        rvPelis.isVisible = true
+                        rvPelis.visibility = View.VISIBLE
+                    }
+
+
 
                     rvPelis.adapter = PeliculaAdapter(info)
                     Handler().postDelayed({ rvPelis.adapter?.notifyDataSetChanged() }, 3000)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Revisa tu conexion a internet", Toast.LENGTH_SHORT)
+
+                    Toast.makeText(requireContext(), "No se pudo cargar mas", Toast.LENGTH_SHORT)
                         .show()
+
+                    lanzadera(page)
                     cont.setOnClickListener(
                         View.OnClickListener {
-                            lanzadera()
+                            lanzadera(page)
                         }
                     )
                 }
@@ -151,33 +189,26 @@ class InicioFragment : Fragment() {
         }
     }
 
-    fun lanzadera2(page: Int){
-        GlobalScope.launch(Dispatchers.IO) {
+    fun isOnline(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-            try {
-                //tendria que poner si es la primer pagina o no
-
-                val info = InicioVM.getMoreTRM(page)
-
-                withContext(Dispatchers.Main) {
-
-                    rvPelis.adapter = PeliculaAdapter(info)
-                    Handler().postDelayed({ rvPelis.adapter?.notifyDataSetChanged() }, 1000)
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "No se pudo cargar mas", Toast.LENGTH_SHORT)
-                        .show()
-                    Log.e("Error scroll","$e")
-                    lanzadera2(page)
-                    cont.setOnClickListener(
-                        View.OnClickListener {
-                            lanzadera2(page)
-                        }
-                    )
-                }
+        val capabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        if (capabilities != null) {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                return true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                return true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                return true
             }
         }
+
+        return false
     }
 
 }

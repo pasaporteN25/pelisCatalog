@@ -22,21 +22,12 @@ import retrofit2.awaitResponse
 class InicioViewModel (application: Application): AndroidViewModel(application) {
 
     val listaPeliculas = ArrayList<Pelicula>()
-//    private val repository: PelisRepository
-//    private val getAllPelis: List<PeliculaEnt>
+
+//    fun getTopRatedMovies(): Call<Respuesta> {
+//        val api = ApiTMDBImp()
 //
-//
-//    init{
-//        val peliDao = PelisDatabase.getDB(application).peliDao()
-//        repository = PelisRepository(peliDao)
-//        getAllPelis = repository.getAllPelis
+//        return api.getTopRatedMovies()
 //    }
-
-    fun getTopRatedMovies(): Call<Respuesta> {
-        val api = ApiTMDBImp()
-
-        return api.getTopRatedMovies()
-    }
 
 
     fun getMoreTopRatedMovies(page: Int): Call<Respuesta> {
@@ -45,26 +36,26 @@ class InicioViewModel (application: Application): AndroidViewModel(application) 
         return api.getMoreTopRated(page)
     }
 
-    suspend fun getAllMovies(): ArrayList<Pelicula> {
-
-        val resp = getTopRatedMovies().awaitResponse()
-        if (resp.isSuccessful) {
-            val data = resp.body()
-            if (data != null) {
-                var total: Int = 0
-                for (peli in data.peliculas) {
-                    listaPeliculas.add(
-                        Pelicula(
-                            peli.id, peli.titulo, peli.genero, peli.idioma, peli.rating, peli.img
-                        )
-                    )
-                    total += 1
-                }
-                Log.e("Cargando peliculas... ", "$total")
-            }
-        }
-        return listaPeliculas
-    }
+//    suspend fun getAllMovies(): ArrayList<Pelicula> {
+//
+//        val resp = getTopRatedMovies().awaitResponse()
+//        if (resp.isSuccessful) {
+//            val data = resp.body()
+//            if (data != null) {
+//                var total: Int = 0
+//                for (peli in data.peliculas) {
+//                    listaPeliculas.add(
+//                        Pelicula(
+//                            peli.id, peli.titulo, peli.genero, peli.idioma, peli.rating, peli.img
+//                        )
+//                    )
+//                    total += 1
+//                }
+//                Log.e("Cargando peliculas... ", "$total")
+//            }
+//        }
+//        return listaPeliculas
+//    }
 
     suspend fun getMoreTRM(page: Int): ArrayList<Pelicula>{
         val resp = getMoreTopRatedMovies(page).awaitResponse()
@@ -93,6 +84,10 @@ class InicioViewModel (application: Application): AndroidViewModel(application) 
 
             db.peliDao().addPeli(peli)
         }
+    }
+
+    fun getPelis(): List<PeliculaEnt>{
+        return db.peliDao().getAllPelis()
     }
 
 
