@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.feluts.peliscatalog.R
+import com.feluts.peliscatalog.databinding.InicioFragmentBinding
 import com.feluts.peliscatalog.model.Pelicula
 import com.feluts.peliscatalog.model.PeliculaEnt
 import com.feluts.peliscatalog.rv.PeliculaAdapter
@@ -36,39 +37,33 @@ class InicioFragment : Fragment() {
         fun newInstance() = InicioFragment()
     }
 
+    private var _binding: InicioFragmentBinding? = null
+    private val binding get() = _binding!!
     private lateinit var InicioVM: InicioViewModel
-    private lateinit var rvPelis: RecyclerView
-    private lateinit var PBar: ProgressBar
     private lateinit var cont: ConstraintLayout
     var paginAct: Int = 1
-    private lateinit var pelis: ArrayList<Pelicula>
-    private lateinit var gen: ArrayList<Int>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.inicio_fragment, container, false)
+        //val view = inflater.inflate(R.layout.inicio_fragment, container, false)
+        _binding = InicioFragmentBinding.inflate(inflater, container, false)
         (activity as AppCompatActivity).supportActionBar?.show()
-
-        //InicioVM = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory
-        //    .getInstance(Application())).get(InicioViewModel::class.java)
-
-
         InicioVM = ViewModelProvider(this).get(InicioViewModel::class.java)
+        val rvPelis = binding.peliRv
+        val PBar = binding.progressBar
 
-        rvPelis = view.findViewById(R.id.peli_rv)
+        //Se supone que esto ayudaba a que no suba cuando lo recargo...
         rvPelis.layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
         rvPelis.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
-        PBar = view.findViewById(R.id.progressBar)
-        cont = view.findViewById(R.id.contenedor_inicio)
         rvPelis.visibility = View.INVISIBLE
         rvPelis.isVisible = false
 
         //Probar si existe la info en la db sino aregarla,
         //si existe traerla
 
-        if (isOnline(view.context) == true) {
+        if (isOnline(requireContext()) == true) {
 
             lanzadera(1)
 
@@ -77,54 +72,55 @@ class InicioFragment : Fragment() {
                 .show()
 
             try {
-                //Aca iria la consulta a la db si no hay internet
-                //por algun motivo si no hay internet esto rompe
-                // Creo que es porque estamos haciendolo en el oncreate
-                //y si no hay internet al estar el scroll abajo triggea la lanzadera
-                val pfdb = InicioVM.getPelis()
 
                 PBar.isVisible = false
                 PBar.visibility = View.INVISIBLE
                 rvPelis.isVisible = true
                 rvPelis.visibility = View.VISIBLE
 
+                GlobalScope.launch(Dispatchers.IO){
+                    val pelisdb = InicioVM.getPelis()
 
+                    val gen: ArrayList<Int> = arrayListOf<Int>()
+                    var pelis: ArrayList<Pelicula> = arrayListOf<Pelicula>()
+                    for (p in pelisdb) {
+                        gen.add(0)
+                        pelis.add(Pelicula(p.id, p.titulo, gen, p.idioma, p.rating, p.img))
+                        Log.e("DB load:", p.titulo)
+                    }
 
-                for (p in pfdb) {
-                    gen.add(0)
-                    pelis.add(Pelicula(p.id, p.titulo, gen, p.idioma, p.rating, p.img))
+                    withContext(Dispatchers.Main){
+                        rvPelis.adapter = PeliculaAdapter(pelis)
+                        Handler().postDelayed({ rvPelis.adapter?.notifyDataSetChanged() }, 3000)
+                    }
+
                 }
 
-                rvPelis.adapter = PeliculaAdapter(pelis)
-                Handler().postDelayed({ rvPelis.adapter?.notifyDataSetChanged() }, 3000)
-
             } catch (e: Exception) {
-                Log.d("Error al traer info", "Error")
+                Log.d("Error al traer info", e.toString())
             }
         }
 
-
-
-
-        return view
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        val rvPelis = binding.peliRv
         rvPelis.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (!recyclerView.canScrollVertically(RecyclerView.FOCUS_UP)) {
                     if(!isOnline(requireContext().applicationContext)){
                         Toast.makeText(requireContext(),"No hay internet",Toast.LENGTH_LONG).show()
-                        //consulta db!
                     }else{
+                        //si no hay internet deberia saber hasta que pagina tengo guardado
+                        //en la
+                        //en las pruebas cargo raro
                         paginAct += 1
                         lanzadera(paginAct)
                         Log.d("Api:", "Cargando mas...")
                     }
-
-
                 }
             }
         })
@@ -139,6 +135,11 @@ class InicioFragment : Fragment() {
         //val recyclerViewState = rvPelis.layoutManager?.onSaveInstanceState()
 
         //rvPelis.layoutManager?.onRestoreInstanceState(recyclerViewState)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 
     fun lanzadera(page: Int) {
@@ -161,16 +162,14 @@ class InicioFragment : Fragment() {
                 withContext(Dispatchers.Main) {
 
                     if (page == 1) {
-                        PBar.isVisible = false
-                        PBar.visibility = View.INVISIBLE
-                        rvPelis.isVisible = true
-                        rvPelis.visibility = View.VISIBLE
+                        binding.progressBar.isVisible = false
+                        binding.progressBar.visibility = View.INVISIBLE
+                        binding.peliRv.isVisible = true
+                        binding.peliRv.visibility = View.VISIBLE
                     }
 
-
-
-                    rvPelis.adapter = PeliculaAdapter(info)
-                    Handler().postDelayed({ rvPelis.adapter?.notifyDataSetChanged() }, 3000)
+                    binding.peliRv.adapter = PeliculaAdapter(info)
+                    Handler().postDelayed({ binding.peliRv.adapter?.notifyDataSetChanged() }, 3000)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {

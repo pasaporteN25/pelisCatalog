@@ -12,8 +12,8 @@ interface PeliDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun addPeli(peli: PeliculaEnt)
 
-    @Query("SELECT * FROM pelis_cache")
-    fun getAllPelis(): List<PeliculaEnt>
+    @Query("SELECT * FROM pelis_cache ORDER BY rating DESC")
+    suspend fun getAllPelis(): List<PeliculaEnt>
 
     @Query("SELECT * FROM pelis_cache WHERE id = :id")
     fun getPeliById(id: Int): PeliculaEnt

@@ -19,7 +19,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.awaitResponse
 
-class InicioViewModel (application: Application): AndroidViewModel(application) {
+class InicioViewModel(application: Application) : AndroidViewModel(application) {
 
     val listaPeliculas = ArrayList<Pelicula>()
 
@@ -57,7 +57,7 @@ class InicioViewModel (application: Application): AndroidViewModel(application) 
 //        return listaPeliculas
 //    }
 
-    suspend fun getMoreTRM(page: Int): ArrayList<Pelicula>{
+    suspend fun getMoreTRM(page: Int): ArrayList<Pelicula> {
         val resp = getMoreTopRatedMovies(page).awaitResponse()
         if (resp.isSuccessful) {
             val data = resp.body()
@@ -78,7 +78,7 @@ class InicioViewModel (application: Application): AndroidViewModel(application) 
 
     }
 
-    fun addPeli(peli: PeliculaEnt){
+    fun addPeli(peli: PeliculaEnt) {
 
         viewModelScope.launch(Dispatchers.IO) {
 
@@ -86,10 +86,9 @@ class InicioViewModel (application: Application): AndroidViewModel(application) 
         }
     }
 
-    fun getPelis(): List<PeliculaEnt>{
+    suspend fun getPelis(): List<PeliculaEnt> {
         return db.peliDao().getAllPelis()
     }
-
 
 
 }
