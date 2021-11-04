@@ -48,7 +48,7 @@ class DetallesFragment : Fragment(R.layout.detalles_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         DetallesVM = ViewModelProvider(this).get(DetallesViewModel::class.java)
-        var dataExtra = DetallesVM.getExtraInfo(args.dataPeli.id)
+        val dataExtra = DetallesVM.getExtraInfo(args.dataPeli.id)
         Log.e("Data","$dataExtra")
         binding.tituloTxt.setText(args.dataPeli.titulo)
         binding.rateTxt.setText(args.dataPeli.rating.toString())
@@ -62,8 +62,9 @@ class DetallesFragment : Fragment(R.layout.detalles_fragment) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         DetallesVM = ViewModelProvider(this).get(DetallesViewModel::class.java)
-        var dataExtra = DetallesVM.getExtraInfo(args.dataPeli.id)
-        Handler().postDelayed({binding.descripcion.setText(dataExtra[0].resumen)
+        val dataExtra = DetallesVM.getExtraInfo(args.dataPeli.id)
+        Handler().postDelayed({
+            binding.descripcion.setText(dataExtra[0].resumen)
             binding.estrenoTxt.setText("Estreno: "+dataExtra[0].estreno)
             binding.totalvotesTxt.setText("Votos total: "+dataExtra[0].totalVotos)
                               },3000)

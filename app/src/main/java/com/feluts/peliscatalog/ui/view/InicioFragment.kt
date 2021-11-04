@@ -55,7 +55,7 @@ class InicioFragment : Fragment() {
         val PBar = binding.progressBar
 
         //Se supone que esto ayudaba a que no suba cuando lo recargo...
-        rvPelis.layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
+        //rvPelis.layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
         rvPelis.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
         rvPelis.visibility = View.INVISIBLE
         rvPelis.isVisible = false
@@ -72,7 +72,6 @@ class InicioFragment : Fragment() {
                 .show()
 
             try {
-
                 PBar.isVisible = false
                 PBar.visibility = View.INVISIBLE
                 rvPelis.isVisible = true
@@ -82,7 +81,7 @@ class InicioFragment : Fragment() {
                     val pelisdb = InicioVM.getPelis()
 
                     val gen: ArrayList<Int> = arrayListOf<Int>()
-                    var pelis: ArrayList<Pelicula> = arrayListOf<Pelicula>()
+                    val pelis: ArrayList<Pelicula> = arrayListOf<Pelicula>()
                     for (p in pelisdb) {
                         gen.add(0)
                         pelis.add(Pelicula(p.id, p.titulo, gen, p.idioma, p.rating, p.img))
@@ -91,7 +90,9 @@ class InicioFragment : Fragment() {
 
                     withContext(Dispatchers.Main){
                         rvPelis.adapter = PeliculaAdapter(pelis)
-                        Handler().postDelayed({ rvPelis.adapter?.notifyDataSetChanged() }, 3000)
+                        Handler().postDelayed({
+                            //rvPelis.adapter?.notifyDataSetChanged()
+                                              }, 3000)
                     }
 
                 }
@@ -125,7 +126,7 @@ class InicioFragment : Fragment() {
             }
         })
 
-
+        buscarPelicula()
 
 
     }
@@ -155,10 +156,6 @@ class InicioFragment : Fragment() {
                     InicioVM.addPeli(peli)
                 }
 
-
-                //log de guardado en db
-                //Log.d("DB: ","Punto de guardado")
-
                 withContext(Dispatchers.Main) {
 
                     if (page == 1) {
@@ -169,7 +166,11 @@ class InicioFragment : Fragment() {
                     }
 
                     binding.peliRv.adapter = PeliculaAdapter(info)
-                    Handler().postDelayed({ binding.peliRv.adapter?.notifyDataSetChanged() }, 3000)
+
+                    Handler().postDelayed({
+                        //binding.peliRv.adapter?.notifyDataSetChanged()
+
+                    }, 3000)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -208,6 +209,19 @@ class InicioFragment : Fragment() {
         }
 
         return false
+    }
+
+    fun buscarPelicula(){
+        binding.buscarBtn.setOnClickListener(
+            View.OnClickListener {
+
+                GlobalScope.launch(Dispatchers.IO){
+                    withContext(Dispatchers.Main){
+                        binding.peliRv.adapter = PeliculaAdapter(InicioVM.buscarPeli(binding.buscarTxt.text.toString()))
+                    }
+                }
+            }
+        )
     }
 
 }

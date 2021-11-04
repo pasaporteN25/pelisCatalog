@@ -12,6 +12,7 @@
     android:orientation="horizontal"
     android:padding="10dp">
 
+
     <ImageView
         android:id="@+id/peli_img"
         android:layout_width="150dp"

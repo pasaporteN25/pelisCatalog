@@ -22,40 +22,20 @@ import retrofit2.awaitResponse
 class InicioViewModel(application: Application) : AndroidViewModel(application) {
 
     val listaPeliculas = ArrayList<Pelicula>()
-
-//    fun getTopRatedMovies(): Call<Respuesta> {
-//        val api = ApiTMDBImp()
-//
-//        return api.getTopRatedMovies()
-//    }
+    val respBusqueda = ArrayList<Pelicula>()
 
 
     fun getMoreTopRatedMovies(page: Int): Call<Respuesta> {
         val api = ApiTMDBImp()
-
         return api.getMoreTopRated(page)
     }
 
-//    suspend fun getAllMovies(): ArrayList<Pelicula> {
-//
-//        val resp = getTopRatedMovies().awaitResponse()
-//        if (resp.isSuccessful) {
-//            val data = resp.body()
-//            if (data != null) {
-//                var total: Int = 0
-//                for (peli in data.peliculas) {
-//                    listaPeliculas.add(
-//                        Pelicula(
-//                            peli.id, peli.titulo, peli.genero, peli.idioma, peli.rating, peli.img
-//                        )
-//                    )
-//                    total += 1
-//                }
-//                Log.e("Cargando peliculas... ", "$total")
-//            }
-//        }
-//        return listaPeliculas
-//    }
+    fun buscarPelicula(query: String): Call<Respuesta>{
+        val api = ApiTMDBImp()
+        return api.buscar(query)
+    }
+    //creo que puedo unificar ambas peticiones a este nivel
+    //dependiendo de si tiene query o no tiro un get o el otro
 
     suspend fun getMoreTRM(page: Int): ArrayList<Pelicula> {
         val resp = getMoreTopRatedMovies(page).awaitResponse()
@@ -77,6 +57,28 @@ class InicioViewModel(application: Application) : AndroidViewModel(application) 
         return listaPeliculas
 
     }
+
+    suspend fun buscarPeli(query: String): ArrayList<Pelicula>{
+        val resp = buscarPelicula(query).awaitResponse()
+        if(resp.isSuccessful){
+            val data = resp.body()
+            if(data!=null){
+                for(peli in data.peliculas){
+                    val image:String
+                    if(peli.img==null){
+                        image=""
+                    }else{
+                        image=peli.img
+                    }
+                    respBusqueda.add(Pelicula(peli.id, peli.titulo, peli.genero
+                        , peli.idioma, peli.rating, image))
+                }
+            }
+        }
+        return respBusqueda
+    }
+
+    //DB:
 
     fun addPeli(peli: PeliculaEnt) {
 

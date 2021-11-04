@@ -62,4 +62,9 @@ class PeliculaAdapter(private var listaPelis: ArrayList<Pelicula>): RecyclerView
             vista=view
         }
     }
+
+    fun update(resul: ArrayList<Pelicula>){
+        listaPelis = resul
+        notifyDataSetChanged()
+    }
 }

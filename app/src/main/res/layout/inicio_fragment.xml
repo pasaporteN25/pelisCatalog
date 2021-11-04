@@ -14,9 +14,40 @@
         android:layout_height="match_parent"
         android:background="#c4ecdb"
         android:orientation="vertical"
-
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="-122dp">
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/buscar_txt"
+                android:layout_width="358dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+
+                android:gravity="left"
+                android:hint="Buscar"
+                android:inputType="textPersonName" />
+
+            <ImageButton
+                android:id="@+id/buscar_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="1dp"
+                android:src="@drawable/ic_baseline_play_arrow_24"
+                android:background="@drawable/roundcorner"
+                android:gravity="right"
+                android:visibility="visible"
+                app:cornerRadius="10dp"
+                tools:ignore="RtlHardcoded" />
+        </RelativeLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/peli_rv"
@@ -24,13 +55,6 @@
             android:layout_height="wrap_content">
 
         </androidx.recyclerview.widget.RecyclerView>
-
-        <Button
-            android:id="@+id/actualizar_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Button"
-            android:visibility="gone" />
 
     </LinearLayout>
 
