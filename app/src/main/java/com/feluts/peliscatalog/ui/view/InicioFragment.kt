@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.Handler
+import android.provider.SyncStateContract.Helpers.update
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -40,7 +41,7 @@ class InicioFragment : Fragment() {
     private var _binding: InicioFragmentBinding? = null
     private val binding get() = _binding!!
     private lateinit var InicioVM: InicioViewModel
-    private lateinit var cont: ConstraintLayout
+    //private lateinit var cont: ConstraintLayout
     var paginAct: Int = 1
 
     override fun onCreateView(
@@ -66,6 +67,7 @@ class InicioFragment : Fragment() {
         if (isOnline(requireContext()) == true) {
 
             lanzadera(1)
+            buscarPelicula()
 
         } else {
             Toast.makeText(requireContext(), "Revisa la conexion a internet", Toast.LENGTH_LONG)
@@ -111,11 +113,11 @@ class InicioFragment : Fragment() {
         rvPelis.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (!recyclerView.canScrollVertically(RecyclerView.FOCUS_UP)) {
+                if (!recyclerView.canScrollVertically(RecyclerView.SCROLL_STATE_SETTLING)) {
                     if(!isOnline(requireContext().applicationContext)){
                         Toast.makeText(requireContext(),"No hay internet",Toast.LENGTH_LONG).show()
                     }else{
-                        //si no hay internet deberia saber hasta que pagina tengo guardado
+                        //si no hay internet deberia saber hasta que pagtoretto 1% metas fiestasina tengo guardado
                         //en la
                         //en las pruebas cargo raro
                         paginAct += 1
@@ -127,7 +129,6 @@ class InicioFragment : Fragment() {
         })
 
         buscarPelicula()
-
 
     }
 
@@ -166,11 +167,7 @@ class InicioFragment : Fragment() {
                     }
 
                     binding.peliRv.adapter = PeliculaAdapter(info)
-
-                    Handler().postDelayed({
-                        //binding.peliRv.adapter?.notifyDataSetChanged()
-
-                    }, 3000)
+                    binding.peliRv.adapter
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -179,11 +176,11 @@ class InicioFragment : Fragment() {
                         .show()
 
                     lanzadera(page)
-                    cont.setOnClickListener(
-                        View.OnClickListener {
-                            lanzadera(page)
-                        }
-                    )
+//                    cont.setOnClickListener(
+//                        View.OnClickListener {
+//                            lanzadera(page)
+//                        }
+//                    )
                 }
             }
         }
@@ -217,7 +214,17 @@ class InicioFragment : Fragment() {
 
                 GlobalScope.launch(Dispatchers.IO){
                     withContext(Dispatchers.Main){
-                        binding.peliRv.adapter = PeliculaAdapter(InicioVM.buscarPeli(binding.buscarTxt.text.toString()))
+
+                        try {
+
+                            binding.peliRv.adapter= PeliculaAdapter(InicioVM.buscarPeli(binding.buscarTxt.text.toString()))
+                            Handler().postDelayed({
+                                binding.peliRv.adapter?.notifyDataSetChanged()
+                            }, 1000)
+                        }catch (e:Exception){
+                            Log.e("Error aca: ",e.toString())
+                        }
+
                     }
                 }
             }

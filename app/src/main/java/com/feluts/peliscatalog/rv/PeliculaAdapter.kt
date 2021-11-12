@@ -47,6 +47,10 @@ class PeliculaAdapter(private var listaPelis: ArrayList<Pelicula>): RecyclerView
         return listaPelis.size
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return position
+    }
+
     class ViewHolder(view: View):RecyclerView.ViewHolder(view) {
 
         val titulo: TextView
@@ -61,6 +65,8 @@ class PeliculaAdapter(private var listaPelis: ArrayList<Pelicula>): RecyclerView
             img = view.findViewById(R.id.peli_img)
             vista=view
         }
+
+
     }
 
     fun update(resul: ArrayList<Pelicula>){

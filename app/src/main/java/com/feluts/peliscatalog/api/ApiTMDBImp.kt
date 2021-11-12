@@ -2,6 +2,7 @@ package com.feluts.peliscatalog.api
 
 import com.feluts.peliscatalog.model.Pelicula
 import com.feluts.peliscatalog.model.PeliculaById
+import com.feluts.peliscatalog.model.PostResp
 import com.feluts.peliscatalog.model.Respuesta
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -26,6 +27,10 @@ class ApiTMDBImp {
 
     fun buscar(query: String): Call<Respuesta>{
         return getRetrofit().create(ApiTMDB::class.java).search(query)
+    }
+
+    fun puntuar(id: Int, puntos: Double): Call<PostResp>{
+        return getRetrofit().create(ApiTMDB::class.java).puntuar(id, puntos)
     }
 
 }

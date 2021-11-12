@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
@@ -41,6 +42,16 @@ class DetallesFragment : Fragment(R.layout.detalles_fragment) {
             binding.progressBar3.visibility=View.INVISIBLE
             binding.peliConst.visibility = View.VISIBLE
                               },3000)
+
+        binding.postPuntaje.setOnClickListener(
+            View.OnClickListener {
+                Toast.makeText(this.context,binding.puntajeTxt.text.toString(),Toast.LENGTH_SHORT).show()
+
+                //esta data pasa al VM y de ahi se hace el post
+                //el toast seria si salio bien o no
+                //estaria bueno que todx sea una ventana emergente mas que en el mismo fragment
+            }
+        )
 
         return binding.root
     }

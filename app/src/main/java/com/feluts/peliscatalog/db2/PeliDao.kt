@@ -17,4 +17,5 @@ interface PeliDao {
 
     @Query("SELECT * FROM pelis_cache WHERE id = :id")
     fun getPeliById(id: Int): PeliculaEnt
+
 }

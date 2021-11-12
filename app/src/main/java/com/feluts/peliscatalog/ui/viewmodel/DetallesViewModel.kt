@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.feluts.peliscatalog.api.ApiTMDBImp
 import com.feluts.peliscatalog.model.PeliculaById
+import com.feluts.peliscatalog.model.PostResp
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -15,6 +16,10 @@ class DetallesViewModel : ViewModel() {
     fun getInfoById(id: Int): Call<PeliculaById>{
 
         return ApiTMDBImp().getMovieById(id)
+    }
+
+    fun puntuar(id: Int, puntos: Double): Call<PostResp>{
+        return ApiTMDBImp().puntuar(id,puntos)
     }
 
     fun getExtraInfo(id: Int): ArrayList<PeliculaById>{

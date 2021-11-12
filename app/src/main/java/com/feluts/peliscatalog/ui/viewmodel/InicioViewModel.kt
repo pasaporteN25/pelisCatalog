@@ -74,6 +74,8 @@ class InicioViewModel(application: Application) : AndroidViewModel(application) 
                         , peli.idioma, peli.rating, image))
                 }
             }
+        }else{
+            Log.d("InicioVM: ","Error al traer")
         }
         return respBusqueda
     }
